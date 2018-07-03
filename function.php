@@ -1,4 +1,75 @@
 <?php
+// - - - - - - - - - - - - - - - - - - - - - -
+// Infusionsoft Functions
+// - - - - - - - - - - - - - - - - - - - - - -
+define("CALLBACK_URL", "http://localhost/Projects/Teamwork_API/oauth2client.php");
+define("AUTH_URL", "https://signin.infusionsoft.com/app/oauth/authorize");
+define("ACCESS_TOKEN_URL", "https://api.infusionsoft.com/token");
+define("CLIENT_ID", "5wwajnfs5hpfn8emwjqdmyqr");
+define("CLIENT_SECRET", "VjvKwJnkBq");
+
+function getAuthorized(){
+    //$apibaseURL = "https://api.infusionsoft.com/crm/rest/v1";
+    $url = AUTH_URL."?"
+        ."response_type=code"
+        ."&client_id=". urlencode(CLIENT_ID)
+        ."&scope=full"
+        ."&redirect_uri=". urlencode(CALLBACK_URL);
+
+    header('Location:'.$url);
+}
+
+function getToken($code){
+    $params = array(
+        'client_id'     => CLIENT_ID,
+        'client_secret' => CLIENT_SECRET,
+        'code'          => $code,
+        'grant_type'    => 'authorization_code',
+        'redirect_uri'  => CALLBACK_URL
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, ACCESS_TOKEN_URL);
+    curl_setopt($ch, CURLOPT_POST, count($params));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $decodedResponse = json_decode($response, true);
+    return $decodedResponse;
+}
+
+function refreshToken($refreshToken){
+    $params = array(
+        'grant_type'    => 'refresh_token',
+        'refresh_token'  => $refreshToken
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, ACCESS_TOKEN_URL);
+    curl_setopt($ch, CURLOPT_POST, count($params));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+    curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+        'Authorization: BASIC '. base64_encode( CLIENT_ID.':'.CLIENT_SECRET ),
+        'Accept: application/json'
+    ));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $decodedResponse = json_decode($response, true);
+    print_r($decodedResponse);
+    return $decodedResponse;
+}
+
 
 // - - - - - - - - - - - - - - - - - - - - - -
 // Teamwork Functions

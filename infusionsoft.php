@@ -12,9 +12,10 @@
 include "function.php";
 
 // - - - - - - - - - - - - - - - - - - - - - -
-// API info
+// Authorization Info
 // - - - - - - - - - - - - - - - - - - - - - -
-//$infusionsoft_host = 'sitesnstores.infusionsoft.com';
-//$infusionsoft_api_key = 'be8e2760bcbdb9ab543e53198c0dec18';
+getAuthorized();
 
-Infusionsoft();
+//$code = $_GET['code'];
+
+//getToken($code);

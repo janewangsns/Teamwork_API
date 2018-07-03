@@ -1,130 +1,43 @@
 <?php
-/**
- * @param $url
- * Function to run Get Request through API
- */
-
-// - - - - - - - - - - - - - - - - - - - - - -
-// InfusionSoft Functions
-// - - - - - - - - - - - - - - - - - - - - - -
-function Infusionsoft(){
-    define('OAUTH2_CLIENT_ID', '5wwajnfs5hpfn8emwjqdmyqr');
-    define('OAUTH2_CLIENT_SECRET', 'VjvKwJnkBq');
-
-    $authorizeURL = 'https://signin.infusionsoft.com/app/oauth/authorize';
-    $tokenURL = 'https://api.infusionsoft.com/token';
-    $apiURLBase = 'https://api.infusionsoft.com/crm/rest/v1';
-    $redirectURL = "http://localhost/Projects/Teamwork_API/infusionsoft.php";
-
-    $params = array(
-        'client_id' => OAUTH2_CLIENT_ID,
-        'redirect_uri' => $redirectURL,
-        'response_type' => 'code',
-        'scope' => 'full'
-    );
-
-    $channel = curl_init($authorizeURL);
-    curl_setopt($channel, CURLOPT_POST, 1);
-    curl_setopt($channel, CURLOPT_POSTFIELDS, $params);
-
-    $result = curl_exec($channel);
-    $info = curl_getinfo($ch);
-    print_r($info);
-
-    curl_close ( $channel );
-
-    return;
-
-
-    //curl_setopt($channel, CURLOPT_URL, "https://api.infusionsoft.com/token");
-    //curl_setopt( $channel, CURLOPT_POST, 1 );
-
-    //curl_setopt( $channel, CURLOPT_RETURNTRANSFER, 1 );
-
-    //curl_setopt($channel, CURLOPT_SSL_VERIFYPEER, 0);
-
-    //curl_setopt($channel, CURLOPT_POSTFIELDS, array(
-       // 'code' => $_GET['code'],
-       // 'client_id' => OAUTH2_CLIENT_ID,
-       // 'client_secret' => OAUTH2_CLIENT_SECRET,
-       // 'redirect_uri' => $redirectURL,
-       // 'grant_type' => 'authorization_code'
-    //));
-
-   // $result = json_decode(curl_exec ( $channel ), true);
-
-    //curl_close ( $channel );
-
-    //return $result;
-}
 
 // - - - - - - - - - - - - - - - - - - - - - -
 // Teamwork Functions
 // - - - - - - - - - - - - - - - - - - - - - -
-function GetRequest($url){
-    $company = "sitesnstores";
-    $key = "twp_u3cNmAdrRFQYaLM0mZnNud44fA5c";
-
-    $channel = curl_init();
-
-    curl_setopt( $channel, CURLOPT_URL, "https://". $company .".teamwork.com/". $url );
-    curl_setopt( $channel, CURLOPT_RETURNTRANSFER, 1 );
-    curl_setopt( $channel, CURLOPT_HTTPHEADER,
-        array( "Authorization: BASIC ". base64_encode( $key .":xxx" ))
-    );
-
-    $result = json_decode(curl_exec ( $channel ), true);
-
-    curl_close ( $channel );
-
-    return $result;
-}
-
 /**
  * @param $url
- * @param $value
- * Function to run Post Request through API
+ * @param $request_method
+ * @param null $value
+ * @return mixed
+ * Teamwork API's functions: GET, PUT and POST
  */
-function PostRequest($url, $value){
+function Teamwork($url, $request_method, $value = NULL){
     $company = "sitesnstores";
     $key = "twp_u3cNmAdrRFQYaLM0mZnNud44fA5c";
 
     $channel = curl_init();
-
     curl_setopt( $channel, CURLOPT_URL, "https://". $company .".teamwork.com/". $url );
     curl_setopt( $channel, CURLOPT_RETURNTRANSFER, 1 );
-    curl_setopt( $channel, CURLOPT_POST, 1 );
-    curl_setopt( $channel, CURLOPT_POSTFIELDS, $value );
     curl_setopt( $channel, CURLOPT_HTTPHEADER, array(
         "Authorization: BASIC ". base64_encode( $key .":xxx" ),
         "Content-type: application/json"
     ));
 
-    curl_exec ( $channel );
-
-    curl_close ( $channel );
-}
-
-/**
- * @param $url
- * @param $value
- * Function to run Put Request through API
- */
-function PutRequest($url, $value){
-    $company = "sitesnstores";
-    $key = "twp_u3cNmAdrRFQYaLM0mZnNud44fA5c";
-
-    $channel = curl_init();
-    curl_setopt( $channel, CURLOPT_URL, "https://". $company .".teamwork.com/". $url );
-    curl_setopt( $channel, CURLOPT_RETURNTRANSFER, 1 );
-    curl_setopt($channel, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt( $channel, CURLOPT_POSTFIELDS, $value );
-    curl_setopt( $channel, CURLOPT_HTTPHEADER,
-        array( "Authorization: BASIC ". base64_encode( $key .":xxx" ))
-    );
-
-    echo curl_exec ( $channel );
-
+    switch ($request_method){
+        case "GET":
+            $result = json_decode(curl_exec ( $channel ), true);
+            return $result;
+            break;
+        case "POST":
+            curl_setopt( $channel, CURLOPT_POST, 1 );
+            curl_setopt( $channel, CURLOPT_POSTFIELDS, $value );
+            curl_exec ( $channel );
+            break;
+        case "PUT":
+            curl_setopt($channel, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt( $channel, CURLOPT_POSTFIELDS, $value );
+            curl_exec ( $channel );
+            break;
+    }
     curl_close ( $channel );
 }
 
@@ -134,7 +47,7 @@ function PutRequest($url, $value){
  * Function to check whether new tag already exists
  */
 function CheckTags($tags){
-    $all_tags = GetRequest("tags.json");
+    $all_tags = Teamwork("tags.json", "GET");
     $all_tags_names = array_column($all_tags["tags"], "name");
 
     // Explode new tags to be an array
@@ -156,7 +69,8 @@ function CreateTag($tag){
     $colors = array("#d84640", "#f78234", "#f4bd38", "#b1da34", "#53c944", "#37ced0", "#2f8de4", "#9b7cdb", "#f47fbe", "#a6a6a6", "#4d4d4d", "#9e6957");
     $rand_color = array_rand($colors, 1);
     $tag_formatted = array("tag"=>array("name"=>$tag, "color"=>$colors[$rand_color]));
-    PostRequest("tags.json", $tag_formatted);
+    $tag_formatted_json = json_encode($tag_formatted);
+    Teamwork("tags.json","POST", $tag_formatted_json);
 }
 
 /**
@@ -165,13 +79,13 @@ function CreateTag($tag){
  */
 function JobAssign($num){
     // Get all project ids
-    $all_projects = GetRequest("projects.json");
+    $all_projects = Teamwork("projects.json", "GET");
     $all_project_ids = array_column($all_projects["projects"], "id");
 
     // A collection of all the people's ids who have projects in hand
     $job_id_total = array();
     foreach ($all_project_ids as $project_id){
-        $people_in_project = GetRequest("projects/" . $project_id . "/people.json");
+        $people_in_project = Teamwork("projects/" . $project_id . "/people.json", "GET");
         foreach ($people_in_project["people"] as $person_in_project){
             array_push($job_id_total, $person_in_project["id"]);
         }

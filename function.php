@@ -1,4 +1,4 @@
-<?php 
+<?php
 	// - - - - - - - - - - - - - - - - - - - - - -
 	// Teamwork Functions
 	// - - - - - - - - - - - - - - - - - - - - - -
@@ -140,4 +140,15 @@
 	    }
 	    return $job_assign;
 	}
-?>
+
+	function SetProjectOwner($project_id){
+	    global $opp_contact_name;
+
+	    $all_people = Teamwork("people.json", "GET");
+	    foreach ($all_people['people'] as $each_person){
+	        echo "<pre>";
+	        print_r($each_person);
+	        $name = $each_person['']
+            if ($each_person)
+        }
+    }

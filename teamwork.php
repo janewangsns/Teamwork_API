@@ -1,39 +1,29 @@
 <?php 
 	// - - - - - - - - - - - - - - - - - - - - - -
-	// Include function.php file
+	// Include files
 	// - - - - - - - - - - - - - - - - - - - - - -
-	include "function.php";
+	include "infusionsoft.php";
+    include "function.php";
+
 	// - - - - - - - - - - - - - - - - - - - - - -
 	// New Project Info
 	// - - - - - - - - - - - - - - - - - - - - - -
-	$project_name = "API Project Test";
-	$company_id = "57247";
-	$start_date = "20180715";
-	$end_date = "20180815";
-	$tags = "Overseas";
-	$people_needed = 3;
-	$domain_name = "www.sitesnstores.com.au";
-	$domain_host_with_us = "Yes";
-	$current_server = "AliBaba02";
-	$dns_location = "Cloudflare";
-	$host_ip = "192.168.1.1";
-	$ftp_username = "test";
-	$ftp_password = "test";
-	$control_panel_url = "test.com.au";
+    $company_id = "57247";
+    $tags = "Infusionsoft";
+    $people_needed = 3;
+
+    $project_name = $opp_contact_name." - ".$opp_name;
+    $start_date = $opp_start_date;
+    $end_date = $opp_end_date;
+
 	$new_project_arr = array('project' =>
 	    array(  'name' => $project_name,
 	        'startDate' => $start_date,
 	        'endDate' => $end_date,
 	        'companyId' => $company_id ));
 	$new_project_json = json_encode($new_project_arr);
-	$notes_content = "<p>Domain Name: " . $domain_name . "</p>
-	<p>Main Domain Registered with us: " . $domain_host_with_us . "</p>
-	<p>Current Server: " . $current_server . "</p>
-	<p>DNS Location: " . $dns_location . "</p>
-	<p>Host IP: " . $host_ip . "</p>
-	<p>FTP Username: " . $ftp_username . "</p>
-	<p>FTP Password: " . $ftp_password . "</p>
-	<p>Control Panel URL: " . $control_panel_url . "</p>";
+	$notes_content = $opp_notes_content;
+
 	// - - - - - - - - - - - - - - - - - - - - - -
 	// Check whether this project already exists
 	// - - - - - - - - - - - - - - - - - - - - - -
@@ -58,6 +48,7 @@
 	        $project_id = $existing_project["id"];
 	    }
 	}
+
 	// Update Project Tags
 	$update_tags = "projects/" . $project_id . "/tags.json";
 	$new_project_tags = array("tags"=>array("content"=>$tags));
@@ -65,6 +56,13 @@
 	// Update Project
 	$update_project = "projects/" . $project_id . ".json";
 	Teamwork($update_project, "PUT", $new_project_json);
+
+    // - - - - - - - - - - - - - - - - - - - - - -
+    // Assign project owner
+    // - - - - - - - - - - - - - - - - - - - - - -
+    SetProjectOwner($project_id);
+
+
 	// - - - - - - - - - - - - - - - - - - - - - -
 	// Assign people into the new/updated project
 	// - - - - - - - - - - - - - - - - - - - - - -
@@ -84,6 +82,7 @@
 	    $assign_people_url = "projects/" . $project_id . "/people.json";
 	    Teamwork($assign_people_url, "POST", $people_assigned_json);
 	}
+
 	// - - - - - - - - - - - - - - - - - - - - - -
 	// Add Notes into Project
 	// - - - - - - - - - - - - - - - - - - - - - -
@@ -99,4 +98,3 @@
 	} else{
 	    Teamwork($notebook_url, "POST", $notebook_json);
 	}
-?>
